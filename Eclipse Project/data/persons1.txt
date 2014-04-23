@@ -1,0 +1,4 @@
+Joao Maia;DB; IR
+Joao Neto;DM;AI
+Miguel Mendes;DM;DB
+Diogo Barroso;IR

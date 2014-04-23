@@ -10,6 +10,7 @@
 #include <limits>
 #include <cmath>
 #include <iostream>
+#include "Person.h"
 using namespace std;
 
 template <class T> class Edge;
@@ -249,7 +250,7 @@ public:
 	//exercicio 8
 	Graph<T> clone();
 	void resetEdgeFlow();
-	vector<Vertex<T>*> calculatePrim();
+	vector<Vertex<T>*> calculatePrim(vector<Person::skills_t> requiredSKills);
 	//vector<Vertex<T>*> calculateKruskal();
 	//vector<Vertex<T>*> calculateFordFulkerson(T source);
 	//float calculateFordFulkerson(Vertex<T>* current, Vertex<T>* parent, float min, Graph<T>* gf, Graph<T>* gr, vector<Vertex<T>*> visited);
@@ -808,11 +809,26 @@ void Graph<T>::resetEdgeFlow()
 	}
 }
 
-template <class T>
-vector<Vertex<T>*> Graph<T>::calculatePrim() {
+template<class T>
+bool checkSkill(const T &p, vector<Person::skills_t> &requiredSkills, Person::skills_t &skillOut)
+{
+	skillOut = Person::none;
+	for(unsigned int i = 0; i < requiredSkills.size(); i++)
+		if(p == requiredSkills[i])
+		{
+			skillOut = requiredSkills[i];
+			requiredSkills.erase(requiredSkills.begin() + i);
+			return true;
+		}
 
-	list<T> buffer;
-	vector<Vertex <T>* > heap;
+	return false;
+}
+
+
+vector<Vertex<Person>*> calculatePrim(vector<Person::skills_t> requiredSkills) {
+
+	list<Person> buffer;
+	vector<Vertex <Person>* > heap;
 
 	for (unsigned int v = 0; v < vertexSet.size(); v++) {
 		Vertex<T>* ver = vertexSet[v];
@@ -841,14 +857,15 @@ vector<Vertex<T>*> Graph<T>::calculatePrim() {
 		for (unsigned int a = 0; a < u->adj.size(); a++) {
 			Vertex<T> * v = u->adj[a].dest;
 
-			if (!v->visited){
+			if (!v->visited) {
 
 				if (v->dist == INT_INFINITY) {
 					heap.push_back(v);
 					push_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
 				}
 
-				if (v->dist > u->adj[a].weight) {
+				Person::skills_t skill;
+				if (v->dist > u->adj[a].weight && checkSkill(v->info, requiredSkills, skill)) {
 					v->dist = u->adj[a].weight;
 					v->path = u;
 				}
