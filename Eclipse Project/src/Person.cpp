@@ -1,11 +1,17 @@
 #include "Person.h"
 
-bool Person::checkSkill(skills_t skill) {
-	return false;
+#include <stdarg.h>
+
+using namespace std;
+
+Person::Person(std::string name, skills_t skills[]) {
+
+	this->name = name;
+	this->skills = vector<skills_t>(skills);
 }
 
-bool Person::operator==(skills_t skill)
-{
+bool Person::checkSkill(skills_t skill) {
+
 	for(unsigned int i = 0; i < skills.size(); i++)
 		if(skill == skills[i])
 			return true;

@@ -18,11 +18,9 @@ public:
 
 
 public:
-	Person(std::string name, std::vector<skills_t> skills) : name(name), skills(skills) {}
+	Person(std::string name, skills_t skills[]);
 
 	bool checkSkill(skills_t skill);
-	bool operator==(skills_t skill);
-	bool operator==(std::vector<skills_t> skills);
 
 private:
 	std::string name;
