@@ -277,6 +277,8 @@ public:
 	vector<T> getfloydWarshallPath(const T &origin, const T &dest);
 	void getfloydWarshallPathAux(int index1, int index2, vector<T> & res);
 
+	vector<Vertex<T>*> calculatePrim();
+
 	//exercicio 8
 	Graph<T> clone();
 	void resetEdgeFlow();
@@ -791,6 +793,63 @@ int Graph<T>::edgeCost(int vOrigIndex, int vDestIndex)
 	}
 
 	return INT_INFINITY;
+}
+
+template <class T>
+vector<Vertex<T>*> Graph<T>::calculatePrim() {
+
+	list<T> buffer;
+	vector<Vertex <T>* > heap;
+
+	for (unsigned int v = 0; v < vertexSet.size(); v++) {
+		Vertex<T>* ver = vertexSet[v];
+
+		ver->path = NULL;
+		ver->dist = INT_INFINITY;
+		ver->visited = false;
+	}
+
+	Vertex<T> * start = vertexSet[0];
+
+	start-> dist = 0;
+	start-> path = NULL;
+
+	heap.push_back(start);
+	push_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
+
+	while (!heap.empty()) {
+
+		pop_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
+		Vertex<T> * u = heap.back();
+		heap.pop_back();
+
+		u->visited = true;
+
+		for (unsigned int a = 0; a < u->adj.size(); a++) {
+			Vertex<T> * v = u->adj[a].dest;
+
+			if (!v->visited){
+
+				if (v->dist == INT_INFINITY) {
+					heap.push_back(v);
+					push_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
+				}
+
+				if (v->dist > u->adj[a].weight) {
+					v->dist = u->adj[a].weight;
+					v->path = u;
+				}
+			}
+		}
+	}
+
+	vector<Vertex<T>* > res;
+
+	for (unsigned int v = 0; v < vertexSet.size(); v++) {
+		res.push_back(vertexSet[v]);
+	}
+
+	return res;
 }
 
 /*void printSquareArray(int ** arr, unsigned int size)

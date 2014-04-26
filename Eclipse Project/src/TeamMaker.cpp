@@ -67,7 +67,14 @@ TeamMaker::TeamMaker()
 	requiredSkills[2] = Skill(Skill::AI);
 	requiredSkills[3] = Skill(Skill::DM);
 
-	calculatePrim(requiredSkills);
+	vector<Vertex<Person>*> res = persons->calculatePrim();
+	for(unsigned int v = 0; v < res.size(); v++)
+	{
+		cout << res[v]->getInfo() << " <- ";
+		if(res[v]->getPath() != NULL)
+			cout << res[v]->getPath()->getInfo();
+		cout << endl;
+	}
 }
 
 TeamMaker::~TeamMaker()
