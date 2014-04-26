@@ -31,7 +31,7 @@ TeamMaker::TeamMaker()
 
 
 	// Jack Edges
-	persons->addEdge(jack, susan, 2);
+	persons->addEdge(jack, susan, 2.0);
 	persons->addEdge(jack, thomas, 7);
 	persons->addEdge(jack, jessie, 6);
 	persons->addEdge(jack, john, 1);
