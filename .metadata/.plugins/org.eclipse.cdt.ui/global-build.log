@@ -1,0 +1,5 @@
+18:17:55 **** Incremental Build of configuration Debug for project filetest ****
+Info: Internal Builder is used for build
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -o "src\\Person.o" "..\\src\\Person.cpp" 
+g++ -o filetest.exe "src\\main.o" "src\\Skill.o" "src\\Person.o" 
+Info: Nothing to build for filetest

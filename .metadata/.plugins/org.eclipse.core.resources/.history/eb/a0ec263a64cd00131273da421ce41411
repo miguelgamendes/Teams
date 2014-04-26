@@ -1,0 +1,38 @@
+#include "Person.h"
+
+Person::Person(std::string name, std::vector<Skill> skills) : name(name){
+	for(unsigned int i = 0; i < skills.size(); i++){
+		(this->skills).push_back(skills[i]);
+	}
+}
+
+bool Person::checkSkill(Skill skill) {
+	return false;
+}
+
+bool Person::operator==(Skill skill)
+{
+	for(unsigned int i = 0; i < skills.size(); i++)
+		if(skill == skills[i])
+			return true;
+
+	return false;
+}
+
+void Person::print(){
+	std::cout << name << " ";
+/*
+	for(unsigned int i = 0; i < skills.size(); i++){
+		std::cout << skills[i] << " ";
+	}
+
+	std::cout << std::endl; */
+}
+
+std::string Person::getName(){
+	return name;
+}
+
+std::string Person::getSkill(){
+	return skills[0].getType();
+}

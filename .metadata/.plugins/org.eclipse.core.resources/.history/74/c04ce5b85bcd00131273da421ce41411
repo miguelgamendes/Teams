@@ -1,0 +1,15 @@
+#include <vector>
+#include "Person.h"
+#include "FileOps.h"
+
+int main(){
+	std::cout << "Program started." << std::endl;
+
+	std::vector<Person> people = loadPeople();
+
+	for(unsigned int i = 0; i < people.size(); i++){
+		people[i].print();
+	}
+
+	return 0;
+}

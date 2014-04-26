@@ -1,0 +1,7 @@
+#include <vector>
+#include "Person.h"
+
+int main(){
+	vector<Person> people;
+	return 0;
+}

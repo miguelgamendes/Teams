@@ -1,0 +1,3 @@
+Ana;DM;DB
+Mariana;AI;IR
+Paulo;DB;DM;IR;AI
