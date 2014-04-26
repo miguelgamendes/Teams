@@ -1,0 +1,35 @@
+#ifndef FILEOPS_H
+#define FILEOPS_H
+
+#include <fstream>
+#include <stdlib.h>
+#include <vector>
+#include <string>
+#include "Person.h"
+
+std::vector<Person> loadPeople(){
+	std::ifstream inputFile("people.txt", std::ios::in);
+
+	if(!inputFile){
+		std::cerr << "ERROR: File not found." << std::endl;
+		exit(1);
+	}
+
+	std::vector<Person> people;
+	std::string line;
+
+	while(!inputFile.eof()){
+		line = getline(inputFile, line);
+
+	}
+
+	return people;
+}
+
+int skillToInt(std::string skill){
+	int num;
+
+	return num;
+}
+
+#endif

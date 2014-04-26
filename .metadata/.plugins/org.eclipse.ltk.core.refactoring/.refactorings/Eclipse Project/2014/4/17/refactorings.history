@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Eclipse Project/src/FileOps&apos; to &apos;FileOps.h&apos;" description="Rename resource &apos;FileOps&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="src/FileOps" name="FileOps.h" stamp="1398440820463" updateReferences="true"/>
+</session>
