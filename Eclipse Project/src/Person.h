@@ -1,33 +1,35 @@
 #ifndef PERSON_H_
 #define PERSON_H_
 
+#include "Skill.h"
+
 #include <vector>
 #include <string>
+#include <ostream>
 
 class Person
 {
 public:
-	enum skills_t
-	{
-		none = 0,
-		IR = 1,
-		DB = 2,
-		AI = 3,
-		DM = 4
-	};
-
+	typedef std::vector<Skill>::const_iterator SkillIt;
 
 public:
-	Person(std::string name, std::vector<skills_t> skills) : name(name), skills(skills) {}
+	Person(std::string name);
 
-	bool checkSkill(skills_t skill);
-	bool operator==(skills_t skill);
-	bool operator==(std::vector<skills_t> skills);
+	void addSkill(Skill skill);
+
+	bool operator==(const Person& other) const;
+
+	std::string getName() const;
+	const std::vector<Skill>& getSkills() const;
+
+	bool checkSkill(Skill skill) const;
 
 private:
 	std::string name;
-	std::vector<skills_t> skills;
+	std::vector<Skill> skills;
 };
+
+std::ostream& operator<<(std::ostream& os, const Person& person);
 
 
 #endif /* PERSON_H_ */

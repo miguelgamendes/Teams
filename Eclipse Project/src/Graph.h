@@ -7,10 +7,9 @@
 #include <vector>
 #include <queue>
 #include <list>
-#include <limits>
+#include <limits.h>
 #include <cmath>
 #include <iostream>
-#include "Person.h"
 using namespace std;
 
 template <class T> class Edge;
@@ -35,6 +34,7 @@ class Vertex {
 	int indegree;
 	double dist;
 	int set;
+	Vertex* path;
 public:
 	Vertex(T in);
 	friend class Graph<T>;
@@ -47,14 +47,18 @@ public:
 	void setInfo(T info);
 
 	int getDist() const;
+	void setDist(int dist);
+
 	int getIndegree() const;
 	vector<Edge<T> > getAdj() const;
+
 	Vertex<T>* getPath() const;
+	void setPath(Vertex<T>* path);
+
+	bool getVisited();
+	void setVisited(bool visited);
 
 	bool operator<(const Vertex<T> vertex);
-
-	Vertex* path;
-
 	void updateEdgeFlow(unsigned int index, float f);
 };
 
@@ -86,6 +90,7 @@ bool Vertex<T>::removeEdgeTo(Vertex<T> *d) {
 template <class T>
 Vertex<T>::Vertex(T in): info(in), visited(false), processing(false), indegree(0), dist(0) {
 	path = NULL;
+	set = 0;
 }
 
 
@@ -99,7 +104,7 @@ void Vertex<T>::addEdge(Vertex<T> *dest, double w) {
 template <class T>
 void Vertex<T>::addEdge(Vertex<T> *dest, double w, double f)
 {
-	Edge<T> edgeD(dest, w, f);
+	Edge<T> edgeD(this, dest, w, f);
 	edgeD.orig = this;
 	adj.push_back(edgeD);
 }
@@ -116,6 +121,12 @@ int Vertex<T>::getDist() const {
 }
 
 template <class T>
+void Vertex<T>::setDist(int dist)
+{
+	this->dist = dist;
+}
+
+template <class T>
 vector<Edge<T> > Vertex<T>::getAdj() const {
 	return this->adj;
 }
@@ -123,6 +134,12 @@ vector<Edge<T> > Vertex<T>::getAdj() const {
 template <class T>
 Vertex<T>* Vertex<T>::getPath() const {
 	return this->path;
+}
+
+template <class T>
+void Vertex<T>::setPath(Vertex<T>* path)
+{
+	this->path = path;
 }
 
 
@@ -134,6 +151,18 @@ void Vertex<T>::setInfo(T info) {
 template <class T>
 int Vertex<T>::getIndegree() const {
 	return this->indegree;
+}
+
+template <class T>
+bool Vertex<T>::getVisited()
+{
+	return visited;
+}
+
+template <class T>
+void Vertex<T>::setVisited(bool visited)
+{
+	this->visited = visited;
 }
 
 template <class T>
@@ -157,7 +186,7 @@ class Edge {
 	double weight;
 	double flow;
 public:
-	Edge(Vertex<T> *d, double w, double f=0);
+	Edge(Vertex<T>* source, Vertex<T> *destination, double w, double f=0);
 	double getFlow() const;
 	double getWeight() const;
 	Vertex<T> *getDest() const;
@@ -168,7 +197,7 @@ public:
 };
 
 template <class T>
-Edge<T>::Edge(Vertex<T> *d, double w, double f): dest(d), weight(w), flow(f){}
+Edge<T>::Edge(Vertex<T>* source, Vertex<T> *destination, double w, double f): orig(source), dest(destination), weight(w), flow(f){}
 
 template <class T>
 double Edge<T>::getFlow() const {
@@ -219,6 +248,7 @@ class Graph {
 	int ** P;   //path
 
 public:
+	~Graph();
 	bool addVertex(const T &in);
 	bool addEdge(const T &sourc, const T &dest, double w,double f=0);
 	bool removeVertex(const T &in);
@@ -247,15 +277,38 @@ public:
 	vector<T> getfloydWarshallPath(const T &origin, const T &dest);
 	void getfloydWarshallPathAux(int index1, int index2, vector<T> & res);
 
+	vector<Vertex<T>*> calculatePrim();
+
 	//exercicio 8
 	Graph<T> clone();
 	void resetEdgeFlow();
-	vector<Vertex<T>*> calculatePrim(vector<Person::skills_t> requiredSKills);
 	//vector<Vertex<T>*> calculateKruskal();
 	//vector<Vertex<T>*> calculateFordFulkerson(T source);
 	//float calculateFordFulkerson(Vertex<T>* current, Vertex<T>* parent, float min, Graph<T>* gf, Graph<T>* gr, vector<Vertex<T>*> visited);
 
+	vector<Vertex<T> *> getVertexSet();
 };
+
+template <class T>
+Graph<T>::~Graph()
+{
+	for(unsigned i = 0; i < vertexSet.size(); i++)
+	{
+		Vertex<T>* v = vertexSet[i];
+
+		if(v)
+		{
+			delete v;
+			vertexSet[i] = NULL;
+		}
+	}
+}
+
+template <class T>
+vector<Vertex<T> *> Graph<T>::getVertexSet()
+{
+	return vertexSet;
+}
 
 
 template <class T>
@@ -324,9 +377,13 @@ bool Graph<T>::addEdge(const T &sourc, const T &dest, double w, double f) {
 	Vertex<T> *vS, *vD;
 	while (found!=2 && it!=ite ) {
 		if ( (*it)->info == sourc )
-		{ vS=*it; found++;}
+		{
+			vS=*it; found++;
+		}
 		if ( (*it)->info == dest )
-		{ vD=*it; found++;}
+		{
+			vD=*it; found++;
+		}
 		it ++;
 	}
 	if (found!=2) return false;
@@ -738,7 +795,64 @@ int Graph<T>::edgeCost(int vOrigIndex, int vDestIndex)
 	return INT_INFINITY;
 }
 
-void printSquareArray(int ** arr, unsigned int size)
+template <class T>
+vector<Vertex<T>*> Graph<T>::calculatePrim() {
+
+	list<T> buffer;
+	vector<Vertex <T>* > heap;
+
+	for (unsigned int v = 0; v < vertexSet.size(); v++) {
+		Vertex<T>* ver = vertexSet[v];
+
+		ver->path = NULL;
+		ver->dist = INT_INFINITY;
+		ver->visited = false;
+	}
+
+	Vertex<T> * start = vertexSet[0];
+
+	start-> dist = 0;
+	start-> path = NULL;
+
+	heap.push_back(start);
+	push_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
+
+	while (!heap.empty()) {
+
+		pop_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
+		Vertex<T> * u = heap.back();
+		heap.pop_back();
+
+		u->visited = true;
+
+		for (unsigned int a = 0; a < u->adj.size(); a++) {
+			Vertex<T> * v = u->adj[a].dest;
+
+			if (!v->visited){
+
+				if (v->dist == INT_INFINITY) {
+					heap.push_back(v);
+					push_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
+				}
+
+				if (v->dist > u->adj[a].weight) {
+					v->dist = u->adj[a].weight;
+					v->path = u;
+				}
+			}
+		}
+	}
+
+	vector<Vertex<T>* > res;
+
+	for (unsigned int v = 0; v < vertexSet.size(); v++) {
+		res.push_back(vertexSet[v]);
+	}
+
+	return res;
+}
+
+/*void printSquareArray(int ** arr, unsigned int size)
 {
 	for(unsigned int k = 0; k < size; k++)
 	{
@@ -763,7 +877,7 @@ void printSquareArray(int ** arr, unsigned int size)
 
 		cout << endl;
 	}
-}
+}*/
 
 template<class T>
 void Graph<T>::floydWarshallShortestPath() {
@@ -807,79 +921,6 @@ void Graph<T>::resetEdgeFlow()
 		for (unsigned int a = 0; a < vertexSet[i]->adj.size(); a++)
 			vertexSet[i]->adj[a].flow = 0;
 	}
-}
-
-template<class T>
-bool checkSkill(const T &p, vector<Person::skills_t> &requiredSkills, Person::skills_t &skillOut)
-{
-	skillOut = Person::none;
-	for(unsigned int i = 0; i < requiredSkills.size(); i++)
-		if(p == requiredSkills[i])
-		{
-			skillOut = requiredSkills[i];
-			requiredSkills.erase(requiredSkills.begin() + i);
-			return true;
-		}
-
-	return false;
-}
-
-
-vector<Vertex<Person>*> calculatePrim(vector<Person::skills_t> requiredSkills) {
-
-	list<Person> buffer;
-	vector<Vertex <Person>* > heap;
-
-	for (unsigned int v = 0; v < vertexSet.size(); v++) {
-		Vertex<T>* ver = vertexSet[v];
-
-		ver->path = NULL;
-		ver->dist = INT_INFINITY;
-		ver->visited = false;
-	}
-
-	Vertex<T> * start = vertexSet[0];
-
-	start-> dist = 0;
-	start-> path = NULL;
-
-	heap.push_back(start);
-	push_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
-
-	while (!heap.empty()) {
-
-		pop_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
-		Vertex<T> * u = heap.back();
-		heap.pop_back();
-
-		u->visited = true;
-
-		for (unsigned int a = 0; a < u->adj.size(); a++) {
-			Vertex<T> * v = u->adj[a].dest;
-
-			if (!v->visited) {
-
-				if (v->dist == INT_INFINITY) {
-					heap.push_back(v);
-					push_heap(heap.begin(), heap.end(), vertex_greater_than<T>());
-				}
-
-				Person::skills_t skill;
-				if (v->dist > u->adj[a].weight && checkSkill(v->info, requiredSkills, skill)) {
-					v->dist = u->adj[a].weight;
-					v->path = u;
-				}
-			}
-		}
-	}
-
-	vector<Vertex<T>* > res;
-
-	for (unsigned int v = 0; v < vertexSet.size(); v++) {
-		res.push_back(vertexSet[v]);
-	}
-
-	return res;
 }
 
 template <class T>
