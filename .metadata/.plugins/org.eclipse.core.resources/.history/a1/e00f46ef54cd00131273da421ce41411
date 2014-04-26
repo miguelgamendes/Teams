@@ -1,0 +1,25 @@
+#ifndef PERSON_H_
+#define PERSON_H_
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include "Skill.h"
+
+class Person
+{
+public:
+	Person(std::string name, std::vector<skills_t> skills) : name(name), skills(skills) {}
+
+	bool checkSkill(Skill skill);
+	bool operator==(Skill skill);
+	bool operator==(std::vector<Skill> skills);
+	void print();
+
+private:
+	std::string name;
+	std::vector<Skill> skills;
+};
+
+
+#endif /* PERSON_H_ */

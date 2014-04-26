@@ -25,6 +25,7 @@ Skill::type_t Skill::getType() const
 
 ostream& operator<<(ostream& os, const Skill& skill)
 {
+
 	std::string skillsList [] =
 	{
 		"none", "AI", "DB", "DM", "IR"
