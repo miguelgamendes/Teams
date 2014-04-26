@@ -90,6 +90,7 @@ bool Vertex<T>::removeEdgeTo(Vertex<T> *d) {
 template <class T>
 Vertex<T>::Vertex(T in): info(in), visited(false), processing(false), indegree(0), dist(0) {
 	path = NULL;
+	set = 0;
 }
 
 
@@ -103,7 +104,7 @@ void Vertex<T>::addEdge(Vertex<T> *dest, double w) {
 template <class T>
 void Vertex<T>::addEdge(Vertex<T> *dest, double w, double f)
 {
-	Edge<T> edgeD(dest, w, f);
+	Edge<T> edgeD(this, dest, w, f);
 	edgeD.orig = this;
 	adj.push_back(edgeD);
 }
@@ -185,7 +186,7 @@ class Edge {
 	double weight;
 	double flow;
 public:
-	Edge(Vertex<T> *d, double w, double f=0);
+	Edge(Vertex<T>* source, Vertex<T> *destination, double w, double f=0);
 	double getFlow() const;
 	double getWeight() const;
 	Vertex<T> *getDest() const;
@@ -196,7 +197,7 @@ public:
 };
 
 template <class T>
-Edge<T>::Edge(Vertex<T> *d, double w, double f): dest(d), weight(w), flow(f){}
+Edge<T>::Edge(Vertex<T>* source, Vertex<T> *destination, double w, double f): orig(source), dest(destination), weight(w), flow(f){}
 
 template <class T>
 double Edge<T>::getFlow() const {
@@ -374,9 +375,13 @@ bool Graph<T>::addEdge(const T &sourc, const T &dest, double w, double f) {
 	Vertex<T> *vS, *vD;
 	while (found!=2 && it!=ite ) {
 		if ( (*it)->info == sourc )
-		{ vS=*it; found++;}
+		{
+			vS=*it; found++;
+		}
 		if ( (*it)->info == dest )
-		{ vD=*it; found++;}
+		{
+			vD=*it; found++;
+		}
 		it ++;
 	}
 	if (found!=2) return false;
@@ -788,7 +793,7 @@ int Graph<T>::edgeCost(int vOrigIndex, int vDestIndex)
 	return INT_INFINITY;
 }
 
-void printSquareArray(int ** arr, unsigned int size)
+/*void printSquareArray(int ** arr, unsigned int size)
 {
 	for(unsigned int k = 0; k < size; k++)
 	{
@@ -813,7 +818,7 @@ void printSquareArray(int ** arr, unsigned int size)
 
 		cout << endl;
 	}
-}
+}*/
 
 template<class T>
 void Graph<T>::floydWarshallShortestPath() {

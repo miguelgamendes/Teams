@@ -9,10 +9,10 @@ public:
 	TeamMaker();
 	~TeamMaker();
 
-	std::vector<Vertex<Person>*> calculatePrim(std::vector<Person::skills_t> requiredSkills);
+	std::vector<Vertex<Person>*> calculatePrim(std::vector<Skill> requiredSkills);
 
 private:
-	bool checkAndRemoveSkill(std::vector<Person::skills_t>* requiredSkills, Person person);
+	bool checkAndRemoveSkill(std::vector<Skill>* requiredSkills, Person person);
 
 private:
 	Graph<Person>* persons;
