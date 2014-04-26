@@ -14,9 +14,9 @@ Skill::Skill(type_t skill)
 }
 
 bool Skill::operator==(const Skill& other)
-						{
+{
 	return this->skill == other.getType();
-						}
+}
 
 Skill::type_t Skill::getType() const
 {
@@ -25,9 +25,9 @@ Skill::type_t Skill::getType() const
 
 ostream& operator<<(ostream& os, const Skill& skill)
 {
-	std::string skillsList[] =
+	std::string skillsList [] =
 	{
-			"none", "AI", "DB", "DM", "IR"
+		"none", "AI", "DB", "DM", "IR"
 	};
 
 	return os << skillsList[skill.getType()];

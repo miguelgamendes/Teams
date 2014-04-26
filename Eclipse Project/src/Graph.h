@@ -50,7 +50,9 @@ public:
 	void setDist(int dist);
 
 	int getIndegree() const;
+
 	vector<Edge<T> > getAdj() const;
+	void setAdj(vector<Edge<T> > adj);
 
 	Vertex<T>* getPath() const;
 	void setPath(Vertex<T>* path);
@@ -62,6 +64,11 @@ public:
 	void updateEdgeFlow(unsigned int index, float f);
 };
 
+template <class T>
+void Vertex<T>::setAdj(vector<Edge<T> > adj)
+{
+	this->adj = adj;
+}
 
 template <class T>
 struct vertex_greater_than {
@@ -190,6 +197,7 @@ public:
 	double getFlow() const;
 	double getWeight() const;
 	Vertex<T> *getDest() const;
+	Vertex<T> *getSource() const;
 	bool operator<(const Edge<T> &other) const;
 
 	friend class Graph<T>;
@@ -202,6 +210,12 @@ Edge<T>::Edge(Vertex<T>* source, Vertex<T> *destination, double w, double f): or
 template <class T>
 double Edge<T>::getFlow() const {
 	return flow;
+}
+
+template <class T>
+Vertex<T> *Edge<T>::getSource() const
+{
+	return orig;
 }
 
 template <class T>
@@ -225,7 +239,6 @@ struct edge_greater_than {
 		return a.getWeight() > b.getWeight();
 	}
 };
-
 
 
 /* ================================================================================================
@@ -258,6 +271,7 @@ public:
 	int maxNewChildren(Vertex<T> *v, T &inf) const;
 	vector<Vertex<T> * > getVertexSet() const;
 	int getNumVertex() const;
+	vector<Edge<T> > getEdges();
 
 	//exercicio 5
 	Vertex<T>* getVertex(const T &v) const;
@@ -288,6 +302,23 @@ public:
 
 	vector<Vertex<T> *> getVertexSet();
 };
+
+template <class T>
+vector<Edge<T> > Graph<T>::getEdges()
+{
+	vector<Edge<T> > edges;
+
+	for(unsigned int i = 0; i < vertexSet.size(); i++)
+	{
+		Vertex<T>* v = vertexSet[i];
+		vector<Edge<T> > vEdges = v->adj;
+
+		for(unsigned int j = 0; j < vEdges.size(); j++)
+			edges.push_back(vEdges[j]);
+	}
+
+	return edges;
+}
 
 template <class T>
 Graph<T>::~Graph()
@@ -374,7 +405,7 @@ bool Graph<T>::addEdge(const T &sourc, const T &dest, double w, double f) {
 	typename vector<Vertex<T>*>::iterator it= vertexSet.begin();
 	typename vector<Vertex<T>*>::iterator ite= vertexSet.end();
 	int found=0;
-	Vertex<T> *vS, *vD;
+	Vertex<T> *vS = 0, *vD = 0;
 	while (found!=2 && it!=ite ) {
 		if ( (*it)->info == sourc )
 		{

@@ -1,5 +1,8 @@
 #include "TeamMaker.h"
 
+#include <algorithm>
+#include <conio.h>
+
 using namespace std;
 
 TeamMaker::TeamMaker()
@@ -37,28 +40,28 @@ TeamMaker::TeamMaker()
 	persons->addEdge(jack, john, 1);
 
 	// Susan Edges
-	persons->addEdge(susan, jack, 2);
+	//persons->addEdge(susan, jack, 2);
 	persons->addEdge(susan, thomas, 6);
 	persons->addEdge(susan, jessie, 6);
 	persons->addEdge(susan, john, 1);
 
 	// Thomas Edges
-	persons->addEdge(thomas, jack, 7);
-	persons->addEdge(thomas, susan, 6);
+	//persons->addEdge(thomas, jack, 7);
+	//persons->addEdge(thomas, susan, 6);
 	persons->addEdge(thomas, jessie, 4);
 	persons->addEdge(thomas, john, 7);
 
 	// Jessie Edges
-	persons->addEdge(jessie, jack, 6);
-	persons->addEdge(jessie, susan, 6);
-	persons->addEdge(jessie, thomas, 4);
+	//persons->addEdge(jessie, jack, 6);
+	//persons->addEdge(jessie, susan, 6);
+	//persons->addEdge(jessie, thomas, 4);
 	persons->addEdge(jessie, john, 5);
 
 	// John Edges
-	persons->addEdge(john, jack, 1);
+	/*persons->addEdge(john, jack, 1);
 	persons->addEdge(john, susan, 1);
 	persons->addEdge(john, thomas, 7);
-	persons->addEdge(john, jessie, 5);
+	persons->addEdge(john, jessie, 5);*/
 
 
 	vector<Skill> requiredSkills = vector<Skill>(4);
@@ -67,104 +70,132 @@ TeamMaker::TeamMaker()
 	requiredSkills[2] = Skill(Skill::AI);
 	requiredSkills[3] = Skill(Skill::DM);
 
-	vector<Vertex<Person>*> res = persons->calculatePrim();
+	/*vector<Vertex<Person>*> res = persons->calculatePrim();
 	for(unsigned int v = 0; v < res.size(); v++)
 	{
-		cout << res[v]->getInfo() << " <- ";
-		if(res[v]->getPath() != NULL)
-			cout << res[v]->getPath()->getInfo();
-		cout << endl;
-	}
+	cout << res[v]->getInfo() << " <- ";
+	if(res[v]->getPath() != NULL)
+	cout << res[v]->getPath()->getInfo();
+	cout << endl;
+	}*/
+
+	Team* team = calculateKruskal(requiredSkills);
+
+	cout << *team;
+	_getch();
+
+	delete team;
 }
 
 TeamMaker::~TeamMaker()
 {
-	if(persons)
+	if (persons)
 	{
 		delete persons;
 		persons = NULL;
 	}
 }
 
-vector<Vertex<Person>*> TeamMaker::calculatePrim(vector<Skill> requiredSkills)
+Team* TeamMaker::calculateKruskal(std::vector<Skill> requiredSkills)
 {
-	list<Person> buffer;
-	vector<Vertex <Person>* > heap;
-	vector<Vertex <Person>* > vertexSet = persons->getVertexSet();
+	Team* team = new Team();
+	vector<Edge<Person> > edgeHeap = persons->getEdges();
 
-	for (unsigned int v = 0; v < vertexSet.size(); v++)
+	while (!requiredSkills.empty())
 	{
-		Vertex<Person>* ver = vertexSet[v];
+		keepEdgesWithSkill(&requiredSkills, &edgeHeap);
 
-		ver->setPath(NULL);
-		ver->setDist(INT_INFINITY);
-		ver->setVisited(false);
-	}
+		make_heap(edgeHeap.begin(), edgeHeap.end(), edge_greater_than<Person>());
+		pop_heap(edgeHeap.begin(), edgeHeap.end(), edge_greater_than<Person>());
+		Edge<Person> nextEdge = edgeHeap.back();
+		edgeHeap.pop_back();
 
-	Vertex<Person> * start = vertexSet[0];
-
-	start->setDist(0);
-	start->setPath(NULL);
-
-	heap.push_back(start);
-	push_heap(heap.begin(), heap.end(), vertex_greater_than<Person>());
-
-	while (!heap.empty())
-	{
-		pop_heap(heap.begin(), heap.end(), vertex_greater_than<Person>());
-		Vertex<Person> * u = heap.back();
-		heap.pop_back();
-
-		u->setVisited(true);
-
-		vector<Edge<Person> > adj = u->getAdj();
-		for (unsigned int a = 0; a < adj.size(); a++)
+		Vertex<Person>* source = nextEdge.getSource();
+		if (!source->getVisited())
 		{
-			Vertex<Person> * v = adj[a].getDest();
-
-			if (!v->getVisited())
-			{
-				if (v->getDist() == INT_INFINITY)
-				{
-					heap.push_back(v);
-					push_heap(heap.begin(), heap.end(), vertex_greater_than<Person>());
-				}
-
-				if (v->getDist() > adj[a].getWeight())
-				{
-					v->setDist(adj[a].getWeight());
-
-					if(checkAndRemoveSkill(&requiredSkills, v->getInfo()))
-						v->setPath(u);
-				}
-			}
+			removeSkill(&requiredSkills, source->getInfo());
+			source->setVisited(true);
 		}
+
+		Vertex<Person>* dest = nextEdge.getDest();
+		if (!dest->getVisited())
+		{
+			removeSkill(&requiredSkills, dest->getInfo());
+			dest->setVisited(true);
+			dest->setPath(source);
+		}
+
+		team->addEdge(nextEdge);
 	}
 
-	vector<Vertex<Person>* > res = vector<Vertex<Person>* >(vertexSet.size());
-	for(unsigned int v = 0; v < vertexSet.size(); v++)
-	{
-		res[v] = vertexSet[v];
-		cout << res[v]->getInfo() << " <- ";
-		if(res[v]->getPath() != NULL)
-			cout << res[v]->getPath()->getInfo();
-		cout << endl;
-	}
-
-	return res;
+	return team;
 }
 
-bool TeamMaker::checkAndRemoveSkill(vector<Skill>* requiredSkills, Person person)
+struct edgeWithoutSkill
+{
+	const vector<Skill>& skills;
+
+	edgeWithoutSkill(const vector<Skill>& skills) : skills(skills) {}
+
+	bool operator()(const Edge<Person>& edge)
+	{
+		Person source = edge.getSource()->getInfo();
+		Person dest = edge.getDest()->getInfo();
+		bool sourceSkillFound = edge.getSource()->getVisited();
+		bool destSkillFound = edge.getDest()->getVisited();
+
+		vector<Skill>::const_iterator skill;
+		for (skill = skills.begin(); skill != skills.end() && !sourceSkillFound; skill++)
+		{
+			if (source.checkSkill(*skill))
+				sourceSkillFound = true;
+		}
+
+		for (skill = skills.begin(); skill != skills.end() && !destSkillFound; skill++)
+		{
+			if (dest.checkSkill(*skill))
+				destSkillFound = true;
+		}
+
+		return !(sourceSkillFound && destSkillFound);
+	}
+};
+
+void TeamMaker::keepEdgesWithSkill(vector<Skill>* requiredSkills, vector<Edge<Person> >* edges)
+{
+	vector<Edge<Person> >::iterator edgeEnd;
+
+	edgeEnd = remove_if(edges->begin(), edges->end(), edgeWithoutSkill(*requiredSkills));
+	edges->erase(edgeEnd, edges->end());
+}
+
+bool TeamMaker::checkSkill(vector<Skill>* requiredSkills, const Person& person)
 {
 	vector<Skill>::iterator skill;
-	for(skill = requiredSkills->begin(); skill != requiredSkills->end(); skill++)
-	{
-		if(person.checkSkill(*skill))
-		{
-			requiredSkills->erase(skill);
-			return true;
-		}
-	}
+	for (skill = requiredSkills->begin(); skill != requiredSkills->end(); skill++)
+	if (person.checkSkill(*skill))
+		return true;
+
+	return false;
+}
+
+void TeamMaker::removeSkill(vector<Skill>* requiredSkills, const Person& person)
+{
+	vector<Skill>::iterator skill;
+	vector<Skill>::iterator skillEnd;
+	vector<Skill> skills = person.getSkills();
+	for (skill = skills.begin(); skill != skills.end(); skill++)
+		skillEnd = remove(requiredSkills->begin(), requiredSkills->end(), *skill);
+
+	requiredSkills->erase(skillEnd, requiredSkills->end());
+}
+
+bool TeamMaker::isOnTeam(std::vector<Vertex<Person>*>* team, const Person& person)
+{
+	vector<Vertex<Person>*>::iterator member;
+	for (member = team->begin(); member != team->end(); member++)
+	if ((*member)->getInfo() == person)
+		return true;
 
 	return false;
 }
