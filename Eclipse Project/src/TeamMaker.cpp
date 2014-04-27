@@ -9,6 +9,7 @@ using namespace std;
 
 TeamMaker::TeamMaker()
 {
+	// Constructor for testing purposes:
 	persons = new Graph<Person>();
 	Skill AI("AI");
 	Skill DB("DB");
@@ -46,28 +47,16 @@ TeamMaker::TeamMaker()
 	persons->addEdge(jack, john, 1);
 
 	// Susan Edges
-	//persons->addEdge(susan, jack, 2);
 	persons->addEdge(susan, thomas, 6);
 	persons->addEdge(susan, jessie, 6);
 	persons->addEdge(susan, john, 1);
 
 	// Thomas Edges
-	//persons->addEdge(thomas, jack, 7);
-	//persons->addEdge(thomas, susan, 6);
 	persons->addEdge(thomas, jessie, 4);
 	persons->addEdge(thomas, john, 7);
 
 	// Jessie Edges
-	//persons->addEdge(jessie, jack, 6);
-	//persons->addEdge(jessie, susan, 6);
-	//persons->addEdge(jessie, thomas, 4);
 	persons->addEdge(jessie, john, 5);
-
-	// John Edges
-	/*persons->addEdge(john, jack, 1);
-	persons->addEdge(john, susan, 1);
-	persons->addEdge(john, thomas, 7);
-	persons->addEdge(john, jessie, 5);*/
 
 
 	vector<Skill> requiredSkills = vector<Skill>(4);
@@ -76,14 +65,6 @@ TeamMaker::TeamMaker()
 	requiredSkills[2] = DM;
 	requiredSkills[3] = IR;
 
-	/*vector<Vertex<Person>*> res = persons->calculatePrim();
-	for(unsigned int v = 0; v < res.size(); v++)
-	{
-	cout << res[v]->getInfo() << " <- ";
-	if(res[v]->getPath() != NULL)
-	cout << res[v]->getPath()->getInfo();
-	cout << endl;
-	}*/
 
 	Team* team = calculateKruskal(requiredSkills);
 
@@ -167,42 +148,83 @@ void TeamMaker::loadData(const string& filename)
 
 Team* TeamMaker::calculateKruskal(std::vector<Skill> requiredSkills)
 {
+	// Creates the team:
 	Team* team = new Team();
+
+	// Gets all the graph edges:
 	vector<Edge<Person> > edgeHeap = persons->getEdges();
 
 	while (!requiredSkills.empty())
 	{
+		// Removes all the edges with persons which do not meet the required skills:
 		keepEdgesWithSkill(&requiredSkills, &edgeHeap);
 
+		// Sorts elements in a heap after the removal:
 		make_heap(edgeHeap.begin(), edgeHeap.end(), edge_greater_than<Person>());
+
+		// Gets the edge with less weight and removes it from the heap:
 		pop_heap(edgeHeap.begin(), edgeHeap.end(), edge_greater_than<Person>());
 		Edge<Person> nextEdge = edgeHeap.back();
 		edgeHeap.pop_back();
 
+		// Gets the source of the edge:
 		Vertex<Person>* source = nextEdge.getSource();
 		if (!source->getVisited())
 		{
+			// Removes the person's skills from the vector of skills:
 			removeSkill(&requiredSkills, source->getInfo());
+
+			// Flagging the person, so that we know one is already on the team:
 			source->setVisited(true);
 		}
 
+		// Gets the destination of the edge:
 		Vertex<Person>* dest = nextEdge.getDest();
 		if (!dest->getVisited())
 		{
+			// Removes the person's skills from the vector of skills:
 			removeSkill(&requiredSkills, dest->getInfo());
+
+			// Flagging the person, so that we know one is already on the team:
 			dest->setVisited(true);
-			dest->setPath(source);
 		}
 
+		// Adds both persons to the team and links them:
 		team->addEdge(nextEdge);
 	}
 
 	return team;
 }
 
-void TeamMaker::addEdge(const std::string& source, const std::string& dest, unsigned int weight)
+bool TeamMaker::addEdge(const std::string& source, const std::string& dest, unsigned int weight)
 {
+	vector<Vertex<Person>*>::const_iterator vertex;
+	Vertex<Person>* vSource = 0;
+	Vertex<Person>* vDest = 0;
 
+	vector<Vertex<Person>*> vertexSet = persons->getVertexSet();
+
+	// Searching for vSource
+	for(vertex = vertexSet.begin(); vertex != vertexSet.end() && !vSource; vertex++)
+	{
+		if((*vertex)->getInfo().getName() == source)
+			vSource = *vertex;
+	}
+
+	// Searching for vDest
+	for(vertex = vertexSet.begin(); vertex != vertexSet.end() && !vDest; vertex++)
+	{
+		if((*vertex)->getInfo().getName() == dest)
+			vDest = *vertex;
+	}
+
+	// If one or both of the Vertex weren't found:
+	if(!vSource || !vDest)
+		return false;
+
+	persons->addEdge(vSource->getInfo(), vDest->getInfo(), weight);
+
+	return true;
 }
 
 struct edgeWithoutSkill
@@ -211,26 +233,40 @@ struct edgeWithoutSkill
 
 	edgeWithoutSkill(const vector<Skill>& skills) : skills(skills) {}
 
+	/**
+	 * Checks for edges to be removed.
+	 *
+	 * All the edges in which both persons do not have any of the required skills are removed.
+	 * It keeps the edges where one of the vertices is a member, and the other a potential
+	 * skilled member.
+	 */
 	bool operator()(const Edge<Person>& edge)
 	{
+		// Gets the source and destination of the edge:
 		Person source = edge.getSource()->getInfo();
 		Person dest = edge.getDest()->getInfo();
+
+		// Finds out if the source or destination are members of the team:
 		bool sourceSkillFound = edge.getSource()->getVisited();
 		bool destSkillFound = edge.getDest()->getVisited();
 
+		// Searches for a skilled person:
 		vector<Skill>::const_iterator skill;
 		for (skill = skills.begin(); skill != skills.end() && !sourceSkillFound; skill++)
 		{
+			// If the source has a required skill:
 			if (source.checkSkill(*skill))
 				sourceSkillFound = true;
 		}
 
 		for (skill = skills.begin(); skill != skills.end() && !destSkillFound; skill++)
 		{
+			// If the destination has a required skill:
 			if (dest.checkSkill(*skill))
 				destSkillFound = true;
 		}
 
+		// If both source and dest are flagged as true, then the edge is not removed:
 		return !(sourceSkillFound && destSkillFound);
 	}
 };
@@ -245,10 +281,11 @@ void TeamMaker::keepEdgesWithSkill(vector<Skill>* requiredSkills, vector<Edge<Pe
 
 bool TeamMaker::checkSkill(vector<Skill>* requiredSkills, const Person& person)
 {
+	// Checking for a skill in the person:
 	vector<Skill>::iterator skill;
 	for (skill = requiredSkills->begin(); skill != requiredSkills->end(); skill++)
-	if (person.checkSkill(*skill))
-		return true;
+		if (person.checkSkill(*skill))
+			return true;
 
 	return false;
 }
@@ -262,14 +299,4 @@ void TeamMaker::removeSkill(vector<Skill>* requiredSkills, const Person& person)
 		skillEnd = remove(requiredSkills->begin(), requiredSkills->end(), *skill);
 
 	requiredSkills->erase(skillEnd, requiredSkills->end());
-}
-
-bool TeamMaker::isOnTeam(std::vector<Vertex<Person>*>* team, const Person& person)
-{
-	vector<Vertex<Person>*>::iterator member;
-	for (member = team->begin(); member != team->end(); member++)
-	if ((*member)->getInfo() == person)
-		return true;
-
-	return false;
 }

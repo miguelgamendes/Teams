@@ -75,7 +75,7 @@ ostream& operator<<(ostream& os, const Team& team)
 
 	os << endl << "Edges:" << endl;
 	for (edge = edges.begin(); edge != edges.end(); edge++)
-		os << "\t " << edge->getWeight() << "\t " << edge->getSource()->getInfo() << " -> " << edge->getDest()->getInfo() << endl;
+		os << "\t " << edge->getWeight() << "\t " << edge->getSource()->getInfo() << " <-> " << edge->getDest()->getInfo() << endl;
 
 	os << endl << endl;
 
