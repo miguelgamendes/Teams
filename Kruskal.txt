@@ -1,0 +1,12 @@
+	O algoritmo de Kruskal utilizado foi modificado de modo a adaptar-se às características do problema.
+	Em primeiro lugar, criamos uma lista com as skills necessárias à equipa (lista S) e uma lista vazia para os membros da equipa (lista M).
+	Em segundo lugar, obtemos uma lista de todas as arestas do grafo ordenadas por ordem decrescente de peso (lista E).
+	Em terceiro lugar, removemos todas as arestas da lista E que não cumprem nenhuma das seguintes características:
+
+Ambos os vértices da aresta contêm pessoas que têm uma ou mais das skills contidas na lista S.
+Um vértice da aresta corresponde a um membro da equipa e o outro vértice corresponde a uma pessoa com um dos skills da lista S.
+
+Assim, todas as arestas entre membros da equipa e arestas com pessoas sem os skills contidos na lista S são removidas.
+De seguida, é retirada uma aresta do final da lista E (a aresta com menor peso) e verifica-se se alguma ou ambas as pessoas ainda não fazem parte da equipa. Se alguma não fizer, então adicionamo-la à equipa e removemos os skills dessa pessoa da lista S. 
+	Finalmente, voltamos ao terceiro passo (remoção das arestas que não cumprem os requisitos) e repete-se o ciclo até a lista S estiver vazia.
+	No final, obtemos uma equipa com as pessoas com todas as skills necessárias à equipa e com o menor custo de comunicação entre elas.

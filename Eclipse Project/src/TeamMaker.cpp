@@ -250,6 +250,10 @@ struct edgeWithoutSkill
 		bool sourceSkillFound = edge.getSource()->getVisited();
 		bool destSkillFound = edge.getDest()->getVisited();
 
+		// If both persons already do part of the team:
+		if(sourceSkillFound && destSkillFound)
+			return true;
+
 		// Searches for a skilled person:
 		vector<Skill>::const_iterator skill;
 		for (skill = skills.begin(); skill != skills.end() && !sourceSkillFound; skill++)
