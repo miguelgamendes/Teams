@@ -109,75 +109,38 @@ void TeamMaker::loadData(const string& filename)
 	string line;
 
 	while (!inputFile.eof()){
-		bool addedPeople = false;
+		string name;
+		vector<Skill> skills;
+		unsigned int lineIndex = 0;
 		getline(inputFile, line);
 
-		if(!addedPeople){
-			if(line == "---"){
-				addedPeople = true;
-			} else {
-				string name;
-				vector<Skill> skills;
-				unsigned int lineIndex = 0;
-
-				cout << "Getting name..." << endl;
-				//get name
-				for (unsigned int i = 0; i < line.size(); i++){
-					if (line.at(i) == ';'){
-						name = line.substr(0, i);
-						lineIndex = i + 1;
-						break;
-					}
-				}
-
-				cout << "Getting skills..." << std::endl;
-				//get skills
-				for (unsigned int i = lineIndex; i < line.size(); i++){
-					//add skill at ';'
-					if (line.at(i) == ';'){
-						skills.push_back(Skill(line.substr(lineIndex, i - lineIndex)));
-						lineIndex = i + 1;
-					}
-					//add last skill on line
-					if (i == line.size() - 1){
-					skills.push_back(Skill(line.substr(lineIndex, i - lineIndex + 1)));
-					}
-				}
-
-				cout << "Adding person..." << endl;
-
-				persons->addVertex(Person(name, skills));
+		cout << "Getting name..." << endl;
+		//get name
+		for (unsigned int i = 0; i < line.size(); i++){
+			if (line.at(i) == ';'){
+				name = line.substr(0, i);
+				lineIndex = i + 1;
+				break;
 			}
-		} else {
-			string source;
-			string dest;
-			int weight;
-			unsigned lineIndex = 0;
-
-			//get source
-			for (unsigned int i = 0; i < line.size(); i++){
-				if (line.at(i) == ';'){
-					source = line.substr(0, i);
-					lineIndex = i + 1;
-					break;
-				}
-			}
-
-			//get destination
-			for (unsigned int i = lineIndex; i < line.size(); i++){
-				if (line.at(i) == ';'){
-					dest = line.substr(lineIndex, i - lineIndex);
-					lineIndex = i + 1;
-					break;
-				}
-			}
-
-			//get weight
-			weight = atoi(line.substr(lineIndex, line.size() + 1).c_str());
-
-			//add edge
-			addEdge(source, dest, weight);
 		}
+
+		cout << "Getting skills..." << std::endl;
+		//get skills
+		for (unsigned int i = lineIndex; i < line.size(); i++){
+			//add skill at ';'
+			if (line.at(i) == ';'){
+				skills.push_back(Skill(line.substr(lineIndex, i - lineIndex)));
+				lineIndex = i + 1;
+			}
+			//add last skill on line
+			if (i == line.size() - 1){
+				skills.push_back(Skill(line.substr(lineIndex, i - lineIndex + 1)));
+			}
+		}
+
+		cout << "Adding person..." << endl;
+
+		persons->addVertex(Person(name, skills));
 	}
 
 	cout << "File's loaded" << endl;

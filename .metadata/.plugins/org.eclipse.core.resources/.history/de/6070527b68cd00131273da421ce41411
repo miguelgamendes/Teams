@@ -6,7 +6,8 @@
 int main(){
 	std::cout << "Program started." << std::endl;
 
-	std::vector<Person> people = loadPeople();
+	std::vector<Person> people;
+	loadPeople(people);
 
 	std::cout << "OUTPUT:" << std::endl;
 	for(unsigned int i = 0; i < people.size(); i++){

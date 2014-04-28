@@ -1,4 +1,11 @@
-Joao Maia;DB; IR
+Joao Maia;DB;IR
 Joao Neto;DM;AI
 Miguel Mendes;DM;DB
 Diogo Barroso;IR
+---
+Joao Maia;Joao Neto;2
+Joao Maia;Miguel Mendes;3
+Joao Maia;Diogo Barroso;4
+Joao Neto;Miguel Mendes;3
+Joao Neto;Diogo Barroso;6
+Miguel Mendes;Diogo Barroso;2
