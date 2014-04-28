@@ -20,13 +20,19 @@ public:
 	void addSkill(Skill skill);
 
 	bool operator==(const Person& other) const;
+	operator std::string() const;
+	operator int() const;
 
+	unsigned int getID() const;
 	std::string getName() const;
 	const std::vector<Skill>& getSkills() const;
 
 	bool checkSkill(Skill skill) const;
 
 private:
+	static unsigned int nPersons;
+
+	unsigned int id;
 	std::string name;
 	std::vector<Skill> skills;
 };

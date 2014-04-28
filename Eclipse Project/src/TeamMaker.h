@@ -16,7 +16,11 @@ public:
 	~TeamMaker();
 
 	void loadData(const std::string& filename);
-	Team* calculateKruskal(std::vector<Skill> requiredSkills);
+	const Team& calculateKruskal(std::vector<Skill> requiredSkills);
+
+	void visualize();
+
+	const Team& getTeam() const;
 
 private:
 	bool addEdge(const std::string& source, const std::string& dest, unsigned int weight);
@@ -28,6 +32,7 @@ private:
 
 private:
 	Graph<Person>* persons;
+	Team* team;
 };
 
 #endif

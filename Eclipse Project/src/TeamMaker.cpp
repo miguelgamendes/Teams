@@ -3,7 +3,7 @@
 #include <fstream>
 #include <algorithm>
 #include <stdlib.h>
-#include <conio.h>
+#include "graphviewer.h"
 
 using namespace std;
 
@@ -58,20 +58,13 @@ TeamMaker::TeamMaker()
 	// Jessie Edges
 	persons->addEdge(jessie, john, 5);
 
-
 	vector<Skill> requiredSkills = vector<Skill>(4);
 	requiredSkills[0] = AI;
 	requiredSkills[1] = DB;
 	requiredSkills[2] = DM;
 	requiredSkills[3] = IR;
 
-
-	Team* team = calculateKruskal(requiredSkills);
-
-	cout << *team;
-	_getch();
-
-	delete team;
+	calculateKruskal(requiredSkills);
 }
 
 TeamMaker::TeamMaker(const string& filename)
@@ -85,6 +78,12 @@ TeamMaker::~TeamMaker()
 	{
 		delete persons;
 		persons = NULL;
+	}
+
+	if(team)
+	{
+		delete team;
+		team = NULL;
 	}
 }
 
@@ -146,7 +145,7 @@ void TeamMaker::loadData(const string& filename)
 	cout << "File's loaded" << endl;
 }
 
-Team* TeamMaker::calculateKruskal(std::vector<Skill> requiredSkills)
+const Team& TeamMaker::calculateKruskal(std::vector<Skill> requiredSkills)
 {
 	// Creates the team:
 	Team* team = new Team();
@@ -193,7 +192,8 @@ Team* TeamMaker::calculateKruskal(std::vector<Skill> requiredSkills)
 		team->addEdge(nextEdge);
 	}
 
-	return team;
+	this->team = team;
+	return *team;
 }
 
 bool TeamMaker::addEdge(const std::string& source, const std::string& dest, unsigned int weight)
@@ -225,6 +225,46 @@ bool TeamMaker::addEdge(const std::string& source, const std::string& dest, unsi
 	persons->addEdge(vSource->getInfo(), vDest->getInfo(), weight);
 
 	return true;
+}
+
+void TeamMaker::visualize()
+{
+	vector<Vertex<Person>*>::const_iterator vertex;
+
+	vector<Vertex<Person>*> vertexSet = persons->getVertexSet();
+	vector<Edge<Person> > edges = persons->getEdges();
+
+	GraphViewer* gv = new GraphViewer (600, 600, true);
+	gv->createWindow(600, 600);
+	gv->defineVertexColor("blue");
+	gv->defineEdgeColor("black");
+
+	for(vertex = vertexSet.begin(); vertex != vertexSet.end(); vertex++)
+	{
+		Person person = (*vertex)->getInfo();
+
+		gv->addNode(person.getID());
+		gv->setVertexLabel(person.getID(), (string)person);
+	}
+
+	for(unsigned int id = 0; id < edges.size(); id++)
+	{
+		unsigned int v1 = edges[id].getSource()->getInfo().getID();
+		unsigned int v2 = edges[id].getDest()->getInfo().getID();
+
+		gv->addEdge(id, v1, v2, EdgeType::UNDIRECTED);
+		gv->setEdgeWeight(id, edges[id].getWeight());
+	}
+
+	gv->rearrange();
+
+	// Animation
+
+}
+
+const Team& TeamMaker::getTeam() const
+{
+	return *team;
 }
 
 struct edgeWithoutSkill

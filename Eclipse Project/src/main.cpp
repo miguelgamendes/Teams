@@ -7,12 +7,15 @@
 //============================================================================
 
 #include "TeamMaker.h"
+#include <conio.h>
 
 using namespace std;
 
 int main()
 {
-	TeamMaker tm;
+	TeamMaker teamMaker;
+	teamMaker.visualize();
+	_getch();
 
 	return 0;
 }

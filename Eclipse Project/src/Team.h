@@ -15,6 +15,8 @@ public:
 	bool addMember(Vertex<Person>* member);
 	void addEdge(const Edge<Person>& edge);
 
+	void visualize();
+
 	const std::vector<Vertex<Person>*>& getMembers() const;
 	const std::vector<Edge<Person> >& getEdges() const;
 

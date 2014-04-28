@@ -1,5 +1,6 @@
 #include "Team.h"
 
+#include "graphviewer.h"
 #include <algorithm>
 
 struct vertex_person_equals
@@ -50,6 +51,35 @@ void Team::addEdge(const Edge<Person>& edge)
 	addMember(dest);
 
 	edges.push_back(edge);
+}
+
+void Team::visualize()
+{
+	GraphViewer* gv = new GraphViewer (600, 600, true);
+	gv->createWindow(600, 600);
+	gv->defineVertexColor("blue");
+	gv->defineEdgeColor("black");
+
+	vector<Vertex<Person>*>::const_iterator member;
+	for(member = members.begin(); member != members.end(); member++)
+	{
+		Person person = (*member)->getInfo();
+
+		gv->addNode(person);
+		gv->setVertexLabel(person.getID(), (string)person);
+		cout << (string)person;
+	}
+
+	for(unsigned int id = 0; id < edges.size(); id++)
+	{
+		unsigned int v1 = edges[id].getSource()->getInfo().getID();
+		unsigned int v2 = edges[id].getDest()->getInfo().getID();
+
+		gv->addEdge(id, v1, v2, EdgeType::UNDIRECTED);
+		gv->setEdgeWeight(id, edges[id].getWeight());
+	}
+
+	gv->rearrange();
 }
 
 const vector<Vertex<Person>*>& Team::getMembers() const
