@@ -26,8 +26,7 @@ int skillToInt(std::string skill){
 	return num;
 }
 
-std::vector<Person> loadPeople(){
-	std::vector<Person> people;
+void loadPeople(std::vector<Person> &people){
 	std::ifstream inputFile("people.txt", std::ios::in);
 
 	std::cout << "Checking file..." << std::endl;
@@ -77,8 +76,6 @@ std::vector<Person> loadPeople(){
 	}
 
 	std::cout << "Files loaded" << std::endl;
-
-	return people;
 }
 
 #endif
