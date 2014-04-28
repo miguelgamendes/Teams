@@ -250,7 +250,7 @@ public:
 	//exercicio 8
 	Graph<T> clone();
 	void resetEdgeFlow();
-	//vector<Vertex<T>*> calculatePrim(vector<Person::skills_t> requiredSKills);
+	vector<Vertex<T>*> calculatePrim(vector<Person::skills_t> requiredSKills);
 	//vector<Vertex<T>*> calculateKruskal();
 	//vector<Vertex<T>*> calculateFordFulkerson(T source);
 	//float calculateFordFulkerson(Vertex<T>* current, Vertex<T>* parent, float min, Graph<T>* gf, Graph<T>* gr, vector<Vertex<T>*> visited);
@@ -808,7 +808,7 @@ void Graph<T>::resetEdgeFlow()
 			vertexSet[i]->adj[a].flow = 0;
 	}
 }
-/*
+
 template<class T>
 bool checkSkill(const T &p, vector<Person::skills_t> &requiredSkills, Person::skills_t &skillOut)
 {
@@ -824,7 +824,7 @@ bool checkSkill(const T &p, vector<Person::skills_t> &requiredSkills, Person::sk
 	return false;
 }
 
-
+/*
 vector<Vertex<Person>*> calculatePrim(vector<Person::skills_t> requiredSkills) {
 
 	list<Person> buffer;
